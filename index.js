@@ -33,6 +33,18 @@ for (const folder of commandFolders) {
 
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+  try {
+    console.log('⏳ Registering slash commands...');
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: commands }
+    );
+    console.log('✅ Slash commands registered!');
+  } catch (error) {
+    console.error('❌ Failed to register slash commands:', error);
+  }
+}
+)
 
   const commands = [
     new SlashCommandBuilder()
@@ -53,19 +65,10 @@ client.once('ready', async () => {
           )
           .addStringOption(option =>
             option.setName('timestamp')
-              .setDescription('Unix timestamp for the session (e.g. 1714012800)')
+              .setDescription('Unix timestamp for the session (e.g. t:1744957831:f)')
               .setRequired(true)
           )
-          .addStringOption(option =>
-            option.setName('role')
-              .setDescription('Choose your role for the session')
-              .setRequired(false)
-              .addChoices(
-                { name: 'Join as Helper', value: 'helper' },
-                { name: 'Join as Co-Host', value: 'cohost' }
               )
-          )
-      )
       .toJSON()
   ];
 
@@ -81,7 +84,7 @@ client.once('ready', async () => {
   } catch (error) {
     console.error('❌ Failed to register slash commands:', error);
   }
-});
+;
 
 client.on(Events.InteractionCreate, async interaction => {
   if (interaction.isButton()) {
