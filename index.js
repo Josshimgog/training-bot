@@ -65,10 +65,30 @@ client.once('ready', async () => {
           )
           .addStringOption(option =>
             option.setName('timestamp')
-              .setDescription('Unix timestamp for the session (e.g. t:1744957831:f)')
+              .setDescription('Unix timestamp for the session')
               .setRequired(true)
           )
+          .addStringOption(option =>
+            option.setName('status')
+              .setDescription('Initial session status')
+              .setRequired(true)
+              .addChoices(
+                { name: 'Canceled', value: 'canceled' },
+                { name: 'In-progress', value: 'in_progress' },
+                { name: 'Completed', value: 'completed' },
+                { name: 'Not Started', value: 'not_started' }
               )
+          )
+          .addStringOption(option =>
+            option.setName('role')
+              .setDescription('Choose your role for the session')
+              .setRequired(false)
+              .addChoices(
+                { name: 'Join as Helper', value: 'helper' },
+                { name: 'Join as Co-Host', value: 'cohost' }
+              )
+          )
+      )
       .toJSON()
   ];
 
@@ -126,7 +146,27 @@ client.on(Events.InteractionCreate, async interaction => {
       console.log('⚙️ Handling /session create');
       const type = interaction.options.getString('type');
       const timestamp = interaction.options.getString('timestamp');
-      const role = interaction.options.getString('role') || 'Not selected';
+      const status = interaction.options.getString('status');
+      const role = interaction.options.getString('role') || 'Host';
+
+      const now = Math.floor(Date.now() / 1000);
+      const sessionTime = parseInt(timestamp);
+      const timeDiff = sessionTime - now;
+
+      let relativeLabel;
+      if (timeDiff > 86400) {
+        relativeLabel = `${Math.floor(timeDiff / 86400)} days later`;
+      } else if (timeDiff > 3600) {
+        relativeLabel = `${Math.floor(timeDiff / 3600)} hours later`;
+      } else if (timeDiff > 60) {
+        relativeLabel = `${Math.floor(timeDiff / 60)} minutes later`;
+      } else {
+        relativeLabel = `${timeDiff} seconds later`;
+      }
+
+      const statusDisplay = (status === 'not_started' && sessionTime <= now)
+        ? 'Delayed (was Not Started)'
+        : status.replace('_', ' ');
 
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -152,7 +192,7 @@ client.on(Events.InteractionCreate, async interaction => {
       );
 
       await interaction.reply({
-        content: `✅ Session created!\n• Type: ${type}\n• Time: <t:${timestamp}:F>\n• Role: ${role}`,
+        content: `✅ Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})\n• Role: ${role}\n• Status: ${statusDisplay}`,
         components: [row],
         ephemeral: false
       });
