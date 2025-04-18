@@ -34,68 +34,55 @@ for (const folder of commandFolders) {
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
   try {
+    const commands = [
+      new SlashCommandBuilder()
+        .setName('session')
+        .setDescription('Manage training sessions')
+        .addSubcommand(subcommand =>
+          subcommand
+            .setName('create')
+            .setDescription('Create a new session')
+            .addStringOption(option =>
+              option.setName('type')
+                .setDescription('Select session type')
+                .setRequired(true)
+                .addChoices(
+                  { name: 'Store Colleague', value: 'store_colleague' },
+                  { name: 'Security Guard', value: 'security_guard' }
+                )
+            )
+            .addStringOption(option =>
+              option.setName('timestamp')
+                .setDescription('Unix timestamp for the session')
+                .setRequired(true)
+            )
+            .addStringOption(option =>
+              option.setName('status')
+                .setDescription('Initial session status')
+                .setRequired(true)
+                .addChoices(
+                  { name: 'Canceled', value: 'canceled' },
+                  { name: 'In-progress', value: 'in_progress' },
+                  { name: 'Completed', value: 'completed' },
+                  { name: 'Not Started', value: 'not_started' }
+                )
+            )
+            .addStringOption(option =>
+              option.setName('role')
+                .setDescription('Choose your role for the session')
+                .setRequired(false)
+                .addChoices(
+                  { name: 'Join as Helper', value: 'helper' },
+                  { name: 'Join as Co-Host', value: 'cohost' }
+                )
+            )
+        )
+        .toJSON()
+    ];
+
+    const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
     console.log('⏳ Registering slash commands...');
-    await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands }
-    );
-    console.log('✅ Slash commands registered!');
-  } catch (error) {
-    console.error('❌ Failed to register slash commands:', error);
-  }
-}
-)
-
-  const commands = [
-    new SlashCommandBuilder()
-      .setName('session')
-      .setDescription('Manage training sessions')
-      .addSubcommand(subcommand =>
-        subcommand
-          .setName('create')
-          .setDescription('Create a new session')
-          .addStringOption(option =>
-            option.setName('type')
-              .setDescription('Select session type')
-              .setRequired(true)
-              .addChoices(
-                { name: 'Store Colleague', value: 'store_colleague' },
-                { name: 'Security Guard', value: 'security_guard' }
-              )
-          )
-          .addStringOption(option =>
-            option.setName('timestamp')
-              .setDescription('Unix timestamp for the session')
-              .setRequired(true)
-          )
-          .addStringOption(option =>
-            option.setName('status')
-              .setDescription('Initial session status')
-              .setRequired(true)
-              .addChoices(
-                { name: 'Canceled', value: 'canceled' },
-                { name: 'In-progress', value: 'in_progress' },
-                { name: 'Completed', value: 'completed' },
-                { name: 'Not Started', value: 'not_started' }
-              )
-          )
-          .addStringOption(option =>
-            option.setName('role')
-              .setDescription('Choose your role for the session')
-              .setRequired(false)
-              .addChoices(
-                { name: 'Join as Helper', value: 'helper' },
-                { name: 'Join as Co-Host', value: 'cohost' }
-              )
-          )
-      )
-      .toJSON()
-  ];
-
-  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
-
-  try {
-    console.log('📤 Registering slash commands...');
     await rest.put(
       Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
       { body: commands }
@@ -104,7 +91,7 @@ client.once('ready', async () => {
   } catch (error) {
     console.error('❌ Failed to register slash commands:', error);
   }
-;
+});
 
 client.on(Events.InteractionCreate, async interaction => {
   if (interaction.isButton()) {
