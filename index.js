@@ -165,7 +165,5 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 })
 
-const modalHandler = require('./handlers/modalHandler');
-client.on(Events.InteractionCreate, modalHandler.execute);
 
 client.login(process.env.TOKEN);
