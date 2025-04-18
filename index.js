@@ -56,26 +56,6 @@ client.once('ready', async () => {
                 .setDescription('Unix timestamp for the session')
                 .setRequired(true)
             )
-            .addStringOption(option =>
-              option.setName('status')
-                .setDescription('Initial session status')
-                .setRequired(true)
-                .addChoices(
-                  { name: 'Canceled', value: 'canceled' },
-                  { name: 'In-progress', value: 'in_progress' },
-                  { name: 'Completed', value: 'completed' },
-                  { name: 'Not Started', value: 'not_started' }
-                )
-            )
-            .addStringOption(option =>
-              option.setName('role')
-                .setDescription('Choose your role for the session')
-                .setRequired(false)
-                .addChoices(
-                  { name: 'Join as Helper', value: 'helper' },
-                  { name: 'Join as Co-Host', value: 'cohost' }
-                )
-            )
         )
         .toJSON()
     ];
@@ -133,8 +113,6 @@ client.on(Events.InteractionCreate, async interaction => {
       console.log('⚙️ Handling /session create');
       const type = interaction.options.getString('type');
       const timestamp = interaction.options.getString('timestamp');
-      const status = interaction.options.getString('status');
-      const role = interaction.options.getString('role') || 'Host';
 
       const now = Math.floor(Date.now() / 1000);
       const sessionTime = parseInt(timestamp);
@@ -150,10 +128,6 @@ client.on(Events.InteractionCreate, async interaction => {
       } else {
         relativeLabel = `${timeDiff} seconds later`;
       }
-
-      const statusDisplay = (status === 'not_started' && sessionTime <= now)
-        ? 'Delayed (was Not Started)'
-        : status.replace('_', ' ');
 
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -179,7 +153,7 @@ client.on(Events.InteractionCreate, async interaction => {
       );
 
       await interaction.reply({
-        content: `✅ Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})\n• Role: ${role}\n• Status: ${statusDisplay}`,
+        content: `✅ Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})`,
         components: [row],
         ephemeral: false
       });
