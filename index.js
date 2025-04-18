@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GatewayIntentBits, Events, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Events, REST, Routes, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const connectDB = require('./utils/mongo');
 
 const client = new Client({
@@ -56,6 +56,15 @@ client.once('ready', async () => {
               .setDescription('Unix timestamp for the session (e.g. 1714012800)')
               .setRequired(true)
           )
+          .addStringOption(option =>
+            option.setName('role')
+              .setDescription('Choose your role for the session')
+              .setRequired(false)
+              .addChoices(
+                { name: 'Join as Helper', value: 'helper' },
+                { name: 'Join as Co-Host', value: 'cohost' }
+              )
+          )
       )
       .toJSON()
   ];
@@ -83,10 +92,27 @@ client.on(Events.InteractionCreate, async interaction => {
   if (interaction.commandName === 'session' && interaction.options.getSubcommand() === 'create') {
     const type = interaction.options.getString('type');
     const timestamp = interaction.options.getString('timestamp');
+    const role = interaction.options.getString('role') || 'Not selected';
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('join_trainer')
+        .setLabel('Join as Trainer')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId('leave_session')
+        .setLabel('Leave Session')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('delete_session')
+        .setLabel('Delete Session')
+        .setStyle(ButtonStyle.Danger)
+    );
 
     await interaction.reply({
-      content: `✅ Session created!\n• Type: ${type}\n• Time: <t:${timestamp}:F>`,
-      ephemeral: true
+      content: `✅ Session created!\n• Type: ${type}\n• Time: <t:${timestamp}:F>\n• Role: ${role}`,
+      components: [row],
+      ephemeral: false
     });
     return;
   }
