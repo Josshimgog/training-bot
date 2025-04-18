@@ -84,36 +84,81 @@ client.once('ready', async () => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+  if (interaction.isButton()) {
+    try {
+      switch (interaction.customId) {
+        case 'join_trainer':
+          await interaction.reply({ content: '✅ You have joined as a Trainer!', ephemeral: true });
+          break;
+        case 'leave_session':
+          await interaction.reply({ content: '🚪 You have left the session.', ephemeral: true });
+          break;
+        case 'delete_session':
+          await interaction.reply({ content: '🗑️ Session has been deleted.', ephemeral: true });
+          break;
+        case 'join_helper':
+          await interaction.reply({ content: '🤝 You have joined as a Helper!', ephemeral: true });
+          break;
+        case 'join_cohost':
+          await interaction.reply({ content: '🎤 You have joined as a Co-Host!', ephemeral: true });
+          break;
+        default:
+          await interaction.reply({ content: '❓ Unknown button clicked.', ephemeral: true });
+      }
+    } catch (err) {
+      console.error('❌ Error handling button interaction:', err);
+      if (!interaction.replied) {
+        await interaction.reply({ content: 'An error occurred while handling the button click.', ephemeral: true });
+      }
+    }
+    return;
+  }
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
   if (!command) return;
 
   if (interaction.commandName === 'session' && interaction.options.getSubcommand() === 'create') {
-    const type = interaction.options.getString('type');
-    const timestamp = interaction.options.getString('timestamp');
-    const role = interaction.options.getString('role') || 'Not selected';
+    try {
+      console.log('⚙️ Handling /session create');
+      const type = interaction.options.getString('type');
+      const timestamp = interaction.options.getString('timestamp');
+      const role = interaction.options.getString('role') || 'Not selected';
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('join_trainer')
-        .setLabel('Join as Trainer')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId('leave_session')
-        .setLabel('Leave Session')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('delete_session')
-        .setLabel('Delete Session')
-        .setStyle(ButtonStyle.Danger)
-    );
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('join_trainer')
+          .setLabel('Join as Trainer')
+          .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+          .setCustomId('leave_session')
+          .setLabel('Leave Session')
+          .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+          .setCustomId('delete_session')
+          .setLabel('Delete Session')
+          .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+          .setCustomId('join_helper')
+          .setLabel('Join as Helper')
+          .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+          .setCustomId('join_cohost')
+          .setLabel('Join as Co-Host')
+          .setStyle(ButtonStyle.Primary)
+      );
 
-    await interaction.reply({
-      content: `✅ Session created!\n• Type: ${type}\n• Time: <t:${timestamp}:F>\n• Role: ${role}`,
-      components: [row],
-      ephemeral: false
-    });
+      await interaction.reply({
+        content: `✅ Session created!\n• Type: ${type}\n• Time: <t:${timestamp}:F>\n• Role: ${role}`,
+        components: [row],
+        ephemeral: false
+      });
+    } catch (err) {
+      console.error('❌ Error in /session create:', err);
+      if (!interaction.replied) {
+        await interaction.reply({ content: 'There was an error creating the session.', ephemeral: true });
+      }
+    }
     return;
   }
 
