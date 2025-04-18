@@ -17,8 +17,8 @@ const commandFolders = fs.readdirSync(commandsPath);
 
 for (const folder of commandFolders) {
     const folderPath = path.join(commandsPath, folder);
-  
-    // Skip if it's not a directory (like .DS_Store)
+
+    
     if (!fs.lstatSync(folderPath).isDirectory()) continue;
   
     const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
@@ -32,7 +32,7 @@ for (const folder of commandFolders) {
 }
 
 client.once('ready', async () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`Logged in as ${client.user.tag}`);
   try {
     const commands = [
       new SlashCommandBuilder()
@@ -67,9 +67,9 @@ client.once('ready', async () => {
       Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
       { body: commands }
     );
-    console.log('✅ Slash commands registered!');
+    console.log('Slash commands registered!');
   } catch (error) {
-    console.error('❌ Failed to register slash commands:', error);
+    console.error('Failed to register slash commands:', error);
   }
 });
 
@@ -78,25 +78,25 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
       switch (interaction.customId) {
         case 'join_trainer':
-          await interaction.reply({ content: '✅ You have joined as a Trainer!', ephemeral: true });
+          await interaction.reply({ content: 'You have joined as a Trainer!', ephemeral: true });
           break;
         case 'leave_session':
-          await interaction.reply({ content: '🚪 You have left the session.', ephemeral: true });
+          await interaction.reply({ content: 'You have left the session.', ephemeral: true });
           break;
         case 'delete_session':
-          await interaction.reply({ content: '🗑️ Session has been deleted.', ephemeral: true });
+          await interaction.reply({ content: 'Session has been deleted.', ephemeral: true });
           break;
         case 'join_helper':
-          await interaction.reply({ content: '🤝 You have joined as a Helper!', ephemeral: true });
+          await interaction.reply({ content: 'You have joined as a Helper!', ephemeral: true });
           break;
         case 'join_cohost':
-          await interaction.reply({ content: '🎤 You have joined as a Co-Host!', ephemeral: true });
+          await interaction.reply({ content: 'You have joined as a Co-Host!', ephemeral: true });
           break;
         default:
-          await interaction.reply({ content: '❓ Unknown button clicked.', ephemeral: true });
+          await interaction.reply({ content: 'Unknown button clicked.', ephemeral: true });
       }
     } catch (err) {
-      console.error('❌ Error handling button interaction:', err);
+      console.error('Error handling button interaction:', err);
       if (!interaction.replied) {
         await interaction.reply({ content: 'An error occurred while handling the button click.', ephemeral: true });
       }
@@ -153,12 +153,12 @@ client.on(Events.InteractionCreate, async interaction => {
       );
 
       await interaction.reply({
-        content: `✅ Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})`,
+        content: `Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})`,
         components: [row],
         ephemeral: false
       });
     } catch (err) {
-      console.error('❌ Error in /session create:', err);
+      console.error('Error in /session create:', err);
       if (!interaction.replied) {
         await interaction.reply({ content: 'There was an error creating the session.', ephemeral: true });
       }
