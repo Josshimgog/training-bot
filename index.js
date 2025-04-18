@@ -110,59 +110,47 @@ client.on(Events.InteractionCreate, async interaction => {
 
   if (interaction.commandName === 'session' && interaction.options.getSubcommand() === 'create') {
     try {
-      console.log('⚙️ Handling /session create');
-      const type = interaction.options.getString('type');
-      const timestamp = interaction.options.getString('timestamp');
-
-      const now = Math.floor(Date.now() / 1000);
-      const sessionTime = parseInt(timestamp);
-      const timeDiff = sessionTime - now;
-
-      let relativeLabel;
-      if (timeDiff > 86400) {
-        relativeLabel = `${Math.floor(timeDiff / 86400)} days later`;
-      } else if (timeDiff > 3600) {
-        relativeLabel = `${Math.floor(timeDiff / 3600)} hours later`;
-      } else if (timeDiff > 60) {
-        relativeLabel = `${Math.floor(timeDiff / 60)} minutes later`;
-      } else {
-        relativeLabel = `${timeDiff} seconds later`;
+        console.log('⚙️ /session create triggered');
+        const type = interaction.options.getString('type');
+        const timestamp = interaction.options.getString('timestamp');
+        console.log('📦 Options received:', { type, timestamp });
+      
+        const now = Math.floor(Date.now() / 1000);
+        const sessionTime = parseInt(timestamp);
+        const timeDiff = sessionTime - now;
+      
+        let relativeLabel;
+        if (timeDiff > 86400) {
+          relativeLabel = `${Math.floor(timeDiff / 86400)} days later`;
+        } else if (timeDiff > 3600) {
+          relativeLabel = `${Math.floor(timeDiff / 3600)} hours later`;
+        } else if (timeDiff > 60) {
+          relativeLabel = `${Math.floor(timeDiff / 60)} minutes later`;
+        } else {
+          relativeLabel = `${timeDiff} seconds later`;
+        }
+      
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder().setCustomId('join_trainer').setLabel('Join as Trainer').setStyle(ButtonStyle.Success),
+          new ButtonBuilder().setCustomId('leave_session').setLabel('Leave Session').setStyle(ButtonStyle.Secondary),
+          new ButtonBuilder().setCustomId('delete_session').setLabel('Delete Session').setStyle(ButtonStyle.Danger),
+          new ButtonBuilder().setCustomId('join_helper').setLabel('Join as Helper').setStyle(ButtonStyle.Primary),
+          new ButtonBuilder().setCustomId('join_cohost').setLabel('Join as Co-Host').setStyle(ButtonStyle.Primary)
+        );
+      
+        await interaction.reply({
+          content: `✅ Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})`,
+          components: [row],
+          ephemeral: false
+        });
+      
+        console.log('✅ Replied to interaction');
+      } catch (err) {
+        console.error('❌ Error handling /session create:', err);
+        if (!interaction.replied) {
+          await interaction.reply({ content: '❌ Error occurred during session creation.', ephemeral: true });
+        }
       }
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId('join_trainer')
-          .setLabel('Join as Trainer')
-          .setStyle(ButtonStyle.Success),
-        new ButtonBuilder()
-          .setCustomId('leave_session')
-          .setLabel('Leave Session')
-          .setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder()
-          .setCustomId('delete_session')
-          .setLabel('Delete Session')
-          .setStyle(ButtonStyle.Danger),
-        new ButtonBuilder()
-          .setCustomId('join_helper')
-          .setLabel('Join as Helper')
-          .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder()
-          .setCustomId('join_cohost')
-          .setLabel('Join as Co-Host')
-          .setStyle(ButtonStyle.Primary)
-      );
-
-      await interaction.reply({
-        content: `Session created!\n• Host: <@${interaction.user.id}>\n• Type: ${type}\n• Time: <t:${timestamp}:F> (${relativeLabel})`,
-        components: [row],
-        ephemeral: false
-      });
-    } catch (err) {
-      console.error('Error in /session create:', err);
-      if (!interaction.replied) {
-        await interaction.reply({ content: 'There was an error creating the session.', ephemeral: true });
-      }
-    }
     return;
   }
 
@@ -175,7 +163,7 @@ client.on(Events.InteractionCreate, async interaction => {
       ephemeral: true,
     });
   }
-});
+})
 
 const modalHandler = require('./handlers/modalHandler');
 client.on(Events.InteractionCreate, modalHandler.execute);

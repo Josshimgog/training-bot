@@ -23,11 +23,11 @@ module.exports = {
         await session.save();
 
         await interaction.reply({
-          content: `✅ Session created!\n• **Time**: <t:${plannedTime}:F>\n• **Type**: ${sessionType}\n• **Status**: ${sessionStatus}`,
+          content: `Session created!\n• **Time**: <t:${plannedTime}:F>\n• **Type**: ${sessionType}\n• **Status**: ${sessionStatus}`,
           ephemeral: true
         });
       } catch (error) {
-        console.error('❌ Error saving session:', error);
+        console.error('Error saving session:', error);
         await interaction.reply({
           content: 'There was an error saving the session. Please try again later.',
           ephemeral: true
